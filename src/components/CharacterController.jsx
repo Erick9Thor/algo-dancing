@@ -1,9 +1,8 @@
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { CapsuleCollider, RigidBody } from "@react-three/rapier";
-import { useEffect, useRef, useState } from "react";
+import { CapsuleCollider, RigidBody, useRapier } from "@react-three/rapier";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { MathUtils, Vector3 } from "three";
-import { Character } from "@/components/Character";
 import Avatar from "@/components/Avatar";
 
 const normalizeAngle = (angle) => {
@@ -32,6 +31,8 @@ const CharacterController = () => {
   const container = useRef();
   const character = useRef();
 
+  const { rapier, world } = useRapier();
+
   const [animation, setAnimation] = useState("idle");
 
   const characterRotationTarget = useRef(0);
@@ -41,15 +42,42 @@ const CharacterController = () => {
   const cameraWorldPosition = useRef(new Vector3());
   const cameraLookAtWorldPosition = useRef(new Vector3());
   const cameraLookAt = useRef(new Vector3());
+  const playerCapsuleColliderRef = useRef();
 
-  const jumpForce = 50;
-  const [isJumping, setIsJumping] = useState(false);
   const runSpeedMultiplier = 5;
 
-  const [, getKeys] = useKeyboardControls();
+  const [subscribeKeys, getKeys] = useKeyboardControls();
 
-  useFrame(({ camera }) => {
-    const { forward, backward, left, right, run, jump } = getKeys();
+  const jumpHandler = useCallback(() => {
+    const ray = world.castRay(
+      new rapier.Ray(rb.current.translation(), { x: 0, y: -1, z: 0 }),
+      1,
+      true,
+      undefined,
+      undefined,
+      // filter out player capsule collider
+      playerCapsuleColliderRef.current
+    );
+    const grounded = ray && ray.collider;
+    console.log(grounded);
+    if (grounded) {
+      rb.current.applyImpulse({ x: 0, y: 2, z: 0 });
+    }
+  }, [rb, rapier, world]);
+
+  // JUMP
+  useEffect(() => {
+    return subscribeKeys(
+      ({ jump }) => ({ jump }),
+      ({ jump }) => {
+        if (jump) jumpHandler();
+      }
+    );
+  }, [subscribeKeys, jumpHandler]);
+
+  // MOVMENT
+  useFrame(() => {
+    const { forward, backward, left, right, run } = getKeys();
 
     if (rb.current) {
       const vel = rb.current.linvel();
@@ -79,17 +107,13 @@ const CharacterController = () => {
         speed = runSpeedMultiplier;
       }
 
-      if (jump) {
-        console.log("jumping", character);
-        rb.current.applyImpulse({ x: 0, y: 15, z: 0 });
-      }
-
       if (movement.x !== 0 || movement.z !== 0) {
         characterRotationTarget.current = Math.atan2(movement.x, movement.z);
 
         vel.x =
           speed *
           Math.sin(rotationTarget.current + characterRotationTarget.current);
+
         vel.z =
           speed *
           Math.cos(rotationTarget.current + characterRotationTarget.current);
@@ -111,8 +135,10 @@ const CharacterController = () => {
 
       rb.current.setLinvel(vel, true);
     }
+  });
 
-    // CAMERA
+  // CAMERA
+  useFrame(({ camera }) => {
     container.current.rotation.y = MathUtils.lerp(
       container.current.rotation.y,
       rotationTarget.current,
@@ -131,7 +157,13 @@ const CharacterController = () => {
   });
 
   return (
-    <RigidBody colliders={false} lockRotations ref={rb}>
+    <RigidBody
+      colliders={false}
+      lockRotations
+      ref={rb}
+      mass={0.8}
+      type="dynamic"
+    >
       <group ref={container}>
         <group ref={cameraTarget} position-z={1.5} />
         <group ref={cameraPosition} position-y={4} position-z={-4} />
@@ -139,7 +171,11 @@ const CharacterController = () => {
           <Avatar scale={1} position-y={-0.25} animation={animation} />
         </group>
       </group>
-      <CapsuleCollider position={[0, 0.6, 0]} args={[0.8, 0.3, 5]} />
+      <CapsuleCollider
+        ref={playerCapsuleColliderRef}
+        position={[0, 0.6, 0]}
+        args={[0.8, 0.3, 5]}
+      />
     </RigidBody>
   );
 };
