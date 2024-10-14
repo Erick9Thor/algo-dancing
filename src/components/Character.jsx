@@ -55,4 +55,4 @@ export function Character({ animation, ...props }) {
   );
 }
 
-useGLTF.preload("/models/character.glb");
+useGLTF.preload("/assets/models/character.glb");

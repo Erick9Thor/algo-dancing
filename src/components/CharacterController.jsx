@@ -4,6 +4,7 @@ import { CapsuleCollider, RigidBody } from "@react-three/rapier";
 import { useEffect, useRef, useState } from "react";
 import { MathUtils, Vector3 } from "three";
 import { Character } from "@/components/Character";
+import Avatar from "@/components/Avatar";
 
 const normalizeAngle = (angle) => {
   while (angle > Math.PI) angle -= 2 * Math.PI;
@@ -122,7 +123,8 @@ const CharacterController = () => {
         <group ref={cameraTarget} position-z={1.5} />
         <group ref={cameraPosition} position-y={4} position-z={-4} />
         <group ref={character}>
-          <Character scale={0.18} position-y={-0.25} animation={animation} />
+          {/* <Character scale={0.18} position-y={-0.25} animation={animation} /> */}
+          <Avatar scale={1} animation={animation} />
         </group>
       </group>
       <CapsuleCollider args={[0.08, 0.15]} />
