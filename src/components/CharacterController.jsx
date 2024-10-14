@@ -1,9 +1,9 @@
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { CapsuleCollider, RigidBody } from "@react-three/rapier";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MathUtils, Vector3 } from "three";
-import Character from "@/components/Character";
+import { Character } from "@/components/Character";
 
 const normalizeAngle = (angle) => {
   while (angle > Math.PI) angle -= 2 * Math.PI;
@@ -31,7 +31,7 @@ const CharacterController = () => {
   const container = useRef();
   const character = useRef();
 
-  // const [animation, setAnimation] = useState("idle");
+  const [animation, setAnimation] = useState("idle");
 
   const characterRotationTarget = useRef(0);
   const rotationTarget = useRef(0);
@@ -82,10 +82,12 @@ const CharacterController = () => {
         vel.z = Math.cos(
           rotationTarget.current + characterRotationTarget.current
         );
-
-        // setAnimation("walking");
+        if (run) {
+          setAnimation("run");
+        }
+        setAnimation("walk");
       } else {
-        // setAnimation("idle");
+        setAnimation("idle");
       }
       character.current.rotation.y = lerpAngle(
         character.current.rotation.y,
@@ -120,7 +122,7 @@ const CharacterController = () => {
         <group ref={cameraTarget} position-z={1.5} />
         <group ref={cameraPosition} position-y={4} position-z={-4} />
         <group ref={character}>
-          <Character scale={0.18} position-y={-0.25} />
+          <Character scale={0.18} position-y={-0.25} animation={animation} />
         </group>
       </group>
       <CapsuleCollider args={[0.08, 0.15]} />
