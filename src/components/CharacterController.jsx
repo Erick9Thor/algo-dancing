@@ -42,10 +42,14 @@ const CharacterController = () => {
   const cameraLookAtWorldPosition = useRef(new Vector3());
   const cameraLookAt = useRef(new Vector3());
 
+  const jumpForce = 50;
+  const [isJumping, setIsJumping] = useState(false);
+  const runSpeedMultiplier = 5;
+
   const [, getKeys] = useKeyboardControls();
 
   useFrame(({ camera }) => {
-    const { forward, backward, left, right, run } = getKeys();
+    const { forward, backward, left, right, run, jump } = getKeys();
 
     if (rb.current) {
       const vel = rb.current.linvel();
@@ -62,8 +66,6 @@ const CharacterController = () => {
         movement.z = -1;
       }
 
-      // let speed = run ? RUN_SPEED : WALK_SPEED;
-
       if (left) {
         movement.x = 1;
       }
@@ -71,25 +73,36 @@ const CharacterController = () => {
         movement.x = -1;
       }
 
-      // if (movement.x !== 0) {
-      //   rotationTarget.current += ROTATION_SPEED * movement.x;
-      // }
+      let speed = 1;
+
+      if (run) {
+        speed = runSpeedMultiplier;
+      }
+
+      if (jump) {
+        console.log("jumping", character);
+        rb.current.applyImpulse({ x: 0, y: 15, z: 0 });
+      }
 
       if (movement.x !== 0 || movement.z !== 0) {
         characterRotationTarget.current = Math.atan2(movement.x, movement.z);
-        vel.x = Math.sin(
-          rotationTarget.current + characterRotationTarget.current
-        );
-        vel.z = Math.cos(
-          rotationTarget.current + characterRotationTarget.current
-        );
+
+        vel.x =
+          speed *
+          Math.sin(rotationTarget.current + characterRotationTarget.current);
+        vel.z =
+          speed *
+          Math.cos(rotationTarget.current + characterRotationTarget.current);
+
         if (run) {
           setAnimation("run");
+        } else {
+          setAnimation("walking");
         }
-        setAnimation("walk");
       } else {
         setAnimation("idle");
       }
+
       character.current.rotation.y = lerpAngle(
         character.current.rotation.y,
         characterRotationTarget.current,
@@ -123,11 +136,10 @@ const CharacterController = () => {
         <group ref={cameraTarget} position-z={1.5} />
         <group ref={cameraPosition} position-y={4} position-z={-4} />
         <group ref={character}>
-          {/* <Character scale={0.18} position-y={-0.25} animation={animation} /> */}
-          <Avatar scale={1} animation={animation} />
+          <Avatar scale={1} position-y={-0.25} animation={animation} />
         </group>
       </group>
-      <CapsuleCollider args={[0.08, 0.15]} />
+      <CapsuleCollider position={[0, 0.6, 0]} args={[0.8, 0.3, 5]} />
     </RigidBody>
   );
 };
