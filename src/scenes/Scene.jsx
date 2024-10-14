@@ -3,29 +3,13 @@
 import { Canvas } from "@react-three/fiber";
 
 import NavigationControls from "@/components/NavigationControls";
-import Lights from "@/components/Lights";
-import { Physics } from "@react-three/rapier";
-import Ground from "@/components/Ground";
-import { Suspense } from "react";
-import { Avatar } from "@/components/Avatar";
+import Experience from "@/components/Experince";
 
 const Scene = () => {
   return (
     <NavigationControls>
-      <Canvas
-        shadows
-        camera={{
-          position: [0, 5, 10],
-        }}
-      >
-        <Lights />
-
-        <Suspense fallback={null}>
-          <Physics>
-            <Avatar />
-            <Ground scale-y={5} position-z={-45} />
-          </Physics>
-        </Suspense>
+      <Canvas shadows camera={{ position: [3, 3, 3], near: 0.1, fov: 40 }}>
+        <Experience />
       </Canvas>
     </NavigationControls>
   );

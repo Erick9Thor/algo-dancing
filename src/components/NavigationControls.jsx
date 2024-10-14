@@ -9,7 +9,7 @@ const NavigationControls = ({ children }) => {
     { name: "left", keys: ["ArrowLeft", "KeyA"] },
     { name: "right", keys: ["ArrowRight", "KeyD"] },
     { name: "jump", keys: ["Space"] },
-    { name: "reset", keys: ["r", "R"] },
+    { name: "run", keys: ["Shift"] },
   ];
 
   return <KeyboardControls map={controls}>{children}</KeyboardControls>;
