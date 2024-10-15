@@ -82,7 +82,18 @@ const CharacterController = () => {
   const movement = useRef({ x: 0, z: 0 });
 
   const [subscribeKeys, getKeys] = useKeyboardControls();
-  const [currentState, , , , , , setPlayerState] = usePlayerState();
+  const [
+    currentState,
+    isWalking,
+    isRunning,
+    isJumping,
+    isActionLocked,
+    isActionOnProgress,
+    setPlayerState,
+  ] = usePlayerState();
+
+  // Duración de la animación de salto en segundos (ajústala según tu animación)
+  const jumpDuration = 1.2; // por ejemplo, 1.2 segundos
 
   const isGrounded = useCallback(() => {
     const ray = world.castRay(
@@ -97,9 +108,15 @@ const CharacterController = () => {
   }, [rb, rapier, world]);
 
   const jumpHandler = useCallback(() => {
-    if (isGrounded()) {
-      rb.current.applyImpulse({ x: 0, y: 2, z: 0 });
+    if (isGrounded() && !isJumping) {
       setPlayerState("JUMPING");
+      rb.current.applyImpulse({ x: 0, y: 2.5, z: 0 });
+
+      setTimeout(() => {
+        if (isGrounded()) {
+          setPlayerState("IDLE"); // Cambia el estado a IDLE si está en el suelo después del salto
+        }
+      }, jumpDuration * 1000); // Convertimos segundos a milisegundos
     }
   }, [isGrounded, rb, setPlayerState]);
 
@@ -116,50 +133,50 @@ const CharacterController = () => {
   useFrame(() => {
     const { forward, backward, left, right, run } = getKeys();
 
-    if (rb.current) {
-      const vel = rb.current.linvel();
-
-      movement.current.x = 0;
-      movement.current.z = 0;
-
-      if (forward) movement.current.z = 1;
-      if (backward) movement.current.z = -1;
-      if (left) movement.current.x = 1;
-      if (right) movement.current.x = -1;
-
-      let speed = run ? runSpeedMultiplier : 1;
-
-      if (movement.current.x !== 0 || movement.current.z !== 0) {
-        characterRotationTarget.current = Math.atan2(
-          movement.current.x,
-          movement.current.z
-        );
-
-        vel.x =
-          speed *
-          Math.sin(rotationTarget.current + characterRotationTarget.current);
-
-        vel.z =
-          speed *
-          Math.cos(rotationTarget.current + characterRotationTarget.current);
-
-        if (currentState !== "JUMPING") {
-          setPlayerState(run ? "RUNNING" : "WALKING");
-        }
-      } else if (currentState !== "JUMPING") {
+    if (!isActionLocked) {
+      if (forward || backward || left || right) {
+        setPlayerState(run ? "RUNNING" : "WALKING");
+      } else if (isGrounded()) {
         setPlayerState("IDLE");
       }
+    }
 
-      character.current.rotation.y = lerpAngle(
-        character.current.rotation.y,
-        characterRotationTarget.current,
-        0.1
-      );
+    if (isWalking || isRunning) {
+      if (rb.current) {
+        const vel = rb.current.linvel();
 
-      rb.current.setLinvel(vel, true);
+        movement.current.x = 0;
+        movement.current.z = 0;
 
-      if (vel.y === 0 && currentState === "JUMPING" && isGrounded()) {
-        setPlayerState("IDLE");
+        if (forward) movement.current.z = 1;
+        if (backward) movement.current.z = -1;
+        if (left) movement.current.x = 1;
+        if (right) movement.current.x = -1;
+
+        let speed = run ? runSpeedMultiplier : 1;
+
+        if (movement.current.x !== 0 || movement.current.z !== 0) {
+          characterRotationTarget.current = Math.atan2(
+            movement.current.x,
+            movement.current.z
+          );
+
+          vel.x =
+            speed *
+            Math.sin(rotationTarget.current + characterRotationTarget.current);
+
+          vel.z =
+            speed *
+            Math.cos(rotationTarget.current + characterRotationTarget.current);
+        }
+
+        character.current.rotation.y = lerpAngle(
+          character.current.rotation.y,
+          characterRotationTarget.current,
+          0.1
+        );
+
+        rb.current.setLinvel(vel, true);
       }
     }
   });
