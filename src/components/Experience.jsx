@@ -5,7 +5,6 @@ import Map from "@/components/Map";
 import CharacterController from "@/components/CharacterController";
 import { Environment, OrthographicCamera } from "@react-three/drei";
 import Ball from "@/components/Ball";
-import CameraController from "@/components/CameraController";
 
 const Experience = () => {
   const shadowCameraRef = useRef();

@@ -96,7 +96,7 @@ const CharacterController = () => {
 
   const isGrounded = useCallback(() => {
     const ray = world.castRay(
-      new rapier.Ray(rb.current.translation(), { x: 0, y: -1, z: 0 }, true),
+      new rapier.Ray(rb.current?.translation(), { x: 0, y: -1, z: 0 }, true),
       1,
       true,
       undefined,
