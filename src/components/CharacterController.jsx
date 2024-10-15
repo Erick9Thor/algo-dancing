@@ -96,7 +96,7 @@ const CharacterController = () => {
 
   const isGrounded = useCallback(() => {
     const ray = world.castRay(
-      new rapier.Ray(rb.current.translation(), { x: 0, y: -1, z: 0 }),
+      new rapier.Ray(rb.current.translation(), { x: 0, y: -1, z: 0 }, true),
       1,
       true,
       undefined,
@@ -235,7 +235,7 @@ const CharacterController = () => {
       </group>
       <CapsuleCollider
         ref={playerCapsuleColliderRef}
-        position={[0, 0.6, 0]}
+        position={[0, 0.8, 0]}
         args={[0.8, 0.3, 5]}
         friction={5}
       />

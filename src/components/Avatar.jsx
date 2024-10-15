@@ -26,60 +26,78 @@ const Avatar = ({ animation, ...props }) => {
     <group ref={group} {...props} dispose={null}>
       <group name="Scene">
         <group name="avatar" rotation={[Math.PI / 2, 0, 0]}>
-          <primitive object={nodes.Hips} />
+          <primitive object={nodes.Hips} castShadow />
           <skinnedMesh
             name="AvatarBody"
             geometry={nodes.AvatarBody.geometry}
             material={materials.AvatarBody}
             skeleton={nodes.AvatarBody.skeleton}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="AvatarLeftCornea"
             geometry={nodes.AvatarLeftCornea.geometry}
             material={materials.AvatarLeftCornea}
             skeleton={nodes.AvatarLeftCornea.skeleton}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="AvatarLeftEyeball"
             geometry={nodes.AvatarLeftEyeball.geometry}
             material={materials.AvatarLeftEyeball}
             skeleton={nodes.AvatarLeftEyeball.skeleton}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="AvatarRightCornea"
             geometry={nodes.AvatarRightCornea.geometry}
             material={materials.AvatarRightCornea}
             skeleton={nodes.AvatarRightCornea.skeleton}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="AvatarRightEyeball"
             geometry={nodes.AvatarRightEyeball.geometry}
             material={materials.AvatarRightEyeball}
             skeleton={nodes.AvatarRightEyeball.skeleton}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="AvatarTeethUpper"
             geometry={nodes.AvatarTeethUpper.geometry}
             material={materials.AvatarTeethUpper}
             skeleton={nodes.AvatarTeethUpper.skeleton}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="outfit_bottom"
             geometry={nodes.outfit_bottom.geometry}
             material={materials.outfit_bottom}
             skeleton={nodes.outfit_bottom.skeleton}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="outfit_shoes"
             geometry={nodes.outfit_shoes.geometry}
             material={materials.outfit_shoes}
             skeleton={nodes.outfit_shoes.skeleton}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="outfit_top"
             geometry={nodes.outfit_top.geometry}
             material={materials.outfit_top}
             skeleton={nodes.outfit_top.skeleton}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="AvatarEyelashes"
@@ -88,6 +106,8 @@ const Avatar = ({ animation, ...props }) => {
             skeleton={nodes.AvatarEyelashes.skeleton}
             morphTargetDictionary={nodes.AvatarEyelashes.morphTargetDictionary}
             morphTargetInfluences={nodes.AvatarEyelashes.morphTargetInfluences}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="AvatarHead"
@@ -96,6 +116,8 @@ const Avatar = ({ animation, ...props }) => {
             skeleton={nodes.AvatarHead.skeleton}
             morphTargetDictionary={nodes.AvatarHead.morphTargetDictionary}
             morphTargetInfluences={nodes.AvatarHead.morphTargetInfluences}
+            castShadow
+            receiveShadow
           />
           <skinnedMesh
             name="AvatarTeethLower"
@@ -104,6 +126,8 @@ const Avatar = ({ animation, ...props }) => {
             skeleton={nodes.AvatarTeethLower.skeleton}
             morphTargetDictionary={nodes.AvatarTeethLower.morphTargetDictionary}
             morphTargetInfluences={nodes.AvatarTeethLower.morphTargetInfluences}
+            castShadow
+            receiveShadow
           />
         </group>
       </group>

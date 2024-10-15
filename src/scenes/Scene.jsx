@@ -3,7 +3,7 @@
 import { Canvas } from "@react-three/fiber";
 
 import NavigationControls from "@/components/NavigationControls";
-import Experience from "@/components/Experince";
+import Experience from "@/components/Experience";
 
 const Scene = () => {
   return (

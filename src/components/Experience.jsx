@@ -1,12 +1,11 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useRef } from "react";
 import { Physics } from "@react-three/rapier";
-
 import Map from "@/components/Map";
 import CharacterController from "@/components/CharacterController";
 import { Environment, OrthographicCamera } from "@react-three/drei";
-import { useRef } from "react";
+import Ball from "@/components/Ball";
 
-const Experince = () => {
+const Experience = () => {
   const shadowCameraRef = useRef();
 
   return (
@@ -15,7 +14,7 @@ const Experince = () => {
       <directionalLight
         intensity={0.65}
         castShadow
-        position={[-15, 10, 15]}
+        position={[18, 10, 8]}
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-bias={-0.00005}
@@ -29,14 +28,19 @@ const Experince = () => {
           attach={"shadow-camera"}
         />
       </directionalLight>
+
+      <ambientLight intensity={0.5} />
+
       <Suspense fallback={null}>
-        <Physics debug>
+        <Physics>
           <Map scale={20} position={[-15, -1, 10]} />
           <CharacterController />
+
+          <Ball position={[0, 1, 10]} />
         </Physics>
       </Suspense>
     </>
   );
 };
 
-export default Experince;
+export default Experience;
