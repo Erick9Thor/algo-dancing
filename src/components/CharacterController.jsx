@@ -1,9 +1,43 @@
 import { useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { CapsuleCollider, RigidBody, useRapier } from "@react-three/rapier";
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { MathUtils, Vector3 } from "three";
 import Avatar from "@/components/Avatar";
+
+// CUSTOM HOOK
+const usePlayerState = () => {
+  const [currentState, setCurrentState] = useState("INVALID");
+
+  const isWalking = useMemo(() => currentState === "WALKING", [currentState]);
+  const isRunning = useMemo(() => currentState === "RUNNING", [currentState]);
+  const isJumping = useMemo(() => currentState === "JUMPING", [currentState]);
+
+  const isActionLocked = useMemo(() => isJumping, [isJumping]);
+  const isActionOnProgress = useMemo(
+    () => isWalking || isRunning || isJumping,
+    [isWalking, isRunning, isJumping]
+  );
+
+  const setPlayerState = useCallback((newState) => {
+    setCurrentState((prevState) => {
+      if (prevState !== newState) {
+        return newState;
+      }
+      return prevState;
+    });
+  }, []);
+
+  return [
+    currentState,
+    isWalking,
+    isRunning,
+    isJumping,
+    isActionLocked,
+    isActionOnProgress,
+    setPlayerState,
+  ];
+};
 
 const normalizeAngle = (angle) => {
   while (angle > Math.PI) angle -= 2 * Math.PI;
@@ -45,27 +79,30 @@ const CharacterController = () => {
   const playerCapsuleColliderRef = useRef();
 
   const runSpeedMultiplier = 5;
+  const movement = useRef({ x: 0, z: 0 });
 
   const [subscribeKeys, getKeys] = useKeyboardControls();
+  const [currentState, , , , , , setPlayerState] = usePlayerState();
 
-  const jumpHandler = useCallback(() => {
+  const isGrounded = useCallback(() => {
     const ray = world.castRay(
       new rapier.Ray(rb.current.translation(), { x: 0, y: -1, z: 0 }),
       1,
       true,
       undefined,
       undefined,
-      // filter out player capsule collider
       playerCapsuleColliderRef.current
     );
-    const grounded = ray && ray.collider;
-    console.log(grounded);
-    if (grounded) {
-      rb.current.applyImpulse({ x: 0, y: 2, z: 0 });
-    }
+    return ray && ray.collider;
   }, [rb, rapier, world]);
 
-  // JUMP
+  const jumpHandler = useCallback(() => {
+    if (isGrounded()) {
+      rb.current.applyImpulse({ x: 0, y: 2, z: 0 });
+      setPlayerState("JUMPING");
+    }
+  }, [isGrounded, rb, setPlayerState]);
+
   useEffect(() => {
     return subscribeKeys(
       ({ jump }) => ({ jump }),
@@ -75,40 +112,28 @@ const CharacterController = () => {
     );
   }, [subscribeKeys, jumpHandler]);
 
-  // MOVMENT
+  // MOVEMENT
   useFrame(() => {
     const { forward, backward, left, right, run } = getKeys();
 
     if (rb.current) {
       const vel = rb.current.linvel();
 
-      const movement = {
-        x: 0,
-        z: 0,
-      };
+      movement.current.x = 0;
+      movement.current.z = 0;
 
-      if (forward) {
-        movement.z = 1;
-      }
-      if (backward) {
-        movement.z = -1;
-      }
+      if (forward) movement.current.z = 1;
+      if (backward) movement.current.z = -1;
+      if (left) movement.current.x = 1;
+      if (right) movement.current.x = -1;
 
-      if (left) {
-        movement.x = 1;
-      }
-      if (right) {
-        movement.x = -1;
-      }
+      let speed = run ? runSpeedMultiplier : 1;
 
-      let speed = 1;
-
-      if (run) {
-        speed = runSpeedMultiplier;
-      }
-
-      if (movement.x !== 0 || movement.z !== 0) {
-        characterRotationTarget.current = Math.atan2(movement.x, movement.z);
+      if (movement.current.x !== 0 || movement.current.z !== 0) {
+        characterRotationTarget.current = Math.atan2(
+          movement.current.x,
+          movement.current.z
+        );
 
         vel.x =
           speed *
@@ -118,13 +143,11 @@ const CharacterController = () => {
           speed *
           Math.cos(rotationTarget.current + characterRotationTarget.current);
 
-        if (run) {
-          setAnimation("run");
-        } else {
-          setAnimation("walking");
+        if (currentState !== "JUMPING") {
+          setPlayerState(run ? "RUNNING" : "WALKING");
         }
-      } else {
-        setAnimation("idle");
+      } else if (currentState !== "JUMPING") {
+        setPlayerState("IDLE");
       }
 
       character.current.rotation.y = lerpAngle(
@@ -134,6 +157,10 @@ const CharacterController = () => {
       );
 
       rb.current.setLinvel(vel, true);
+
+      if (vel.y === 0 && currentState === "JUMPING" && isGrounded()) {
+        setPlayerState("IDLE");
+      }
     }
   });
 
@@ -155,6 +182,25 @@ const CharacterController = () => {
       camera.lookAt(cameraLookAt.current);
     }
   });
+
+  useEffect(() => {
+    switch (currentState) {
+      case "WALKING":
+        setAnimation("walking");
+        break;
+      case "RUNNING":
+        setAnimation("run");
+        break;
+      case "JUMPING":
+        setAnimation("jumping");
+        break;
+      case "IDLE":
+        setAnimation("idle");
+        break;
+      default:
+        break;
+    }
+  }, [currentState]);
 
   return (
     <RigidBody
