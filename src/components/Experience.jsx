@@ -1,9 +1,11 @@
 import React, { Suspense, useRef } from "react";
 import { Physics } from "@react-three/rapier";
+
 import Map from "@/components/Map";
 import CharacterController from "@/components/CharacterController";
 import { Environment, OrthographicCamera } from "@react-three/drei";
 import Ball from "@/components/Ball";
+import CameraController from "@/components/CameraController";
 
 const Experience = () => {
   const shadowCameraRef = useRef();
@@ -36,7 +38,7 @@ const Experience = () => {
           <Map scale={20} position={[-15, -1, 10]} />
           <CharacterController />
 
-          <Ball position={[0, 1, 10]} />
+          <Ball position={[0, 1, 5]} />
         </Physics>
       </Suspense>
     </>

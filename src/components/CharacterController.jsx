@@ -108,8 +108,8 @@ const CharacterController = () => {
 
   const jumpHandler = useCallback(() => {
     if (isGrounded() && !isJumping) {
-      setPlayerState("JUMPING");
       rb.current.applyImpulse({ x: 0, y: 2.5, z: 0 });
+      setPlayerState("JUMPING");
 
       setTimeout(() => {
         if (isGrounded()) {
@@ -208,7 +208,7 @@ const CharacterController = () => {
         setAnimation("run");
         break;
       case "JUMPING":
-        setAnimation("jumping");
+        // setAnimation("jumping");
         break;
       case "IDLE":
         setAnimation("idle");
