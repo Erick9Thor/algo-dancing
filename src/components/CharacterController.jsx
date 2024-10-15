@@ -92,8 +92,7 @@ const CharacterController = () => {
     setPlayerState,
   ] = usePlayerState();
 
-  // Duración de la animación de salto en segundos (ajústala según tu animación)
-  const jumpDuration = 1.2; // por ejemplo, 1.2 segundos
+  const jumpDuration = 1.2;
 
   const isGrounded = useCallback(() => {
     const ray = world.castRay(
@@ -114,9 +113,9 @@ const CharacterController = () => {
 
       setTimeout(() => {
         if (isGrounded()) {
-          setPlayerState("IDLE"); // Cambia el estado a IDLE si está en el suelo después del salto
+          setPlayerState("IDLE");
         }
-      }, jumpDuration * 1000); // Convertimos segundos a milisegundos
+      }, jumpDuration * 1000);
     }
   }, [isGrounded, rb, setPlayerState]);
 
@@ -238,6 +237,7 @@ const CharacterController = () => {
         ref={playerCapsuleColliderRef}
         position={[0, 0.6, 0]}
         args={[0.8, 0.3, 5]}
+        friction={5}
       />
     </RigidBody>
   );
